@@ -173,7 +173,7 @@ if ($Retention) {
     }
     #"Catch up" if backup was missed on last day of month
     $MonthlyArchives = gci "$BackupTarget\Monthlies" -Filter "*.7z"
-    if (($MonthlyArchives[-1].LastWriteTime) -lt (Get-Date -hour 0 -minute 0 -second 0).AddMonths(-1)) {
+    if ($MonthlyArchives.Count -eq 0 -or ($MonthlyArchives[-1].LastWriteTime) -lt (Get-Date -hour 0 -minute 0 -second 0).AddMonths(-1)) {
         copy ("$BackupTarget\$Date" + ".7z ") "$BackupTarget\Monthlies"
     }
     #Delete daily backups older than limit
