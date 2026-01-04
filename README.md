@@ -6,7 +6,7 @@ The Registry - The cause of, and solution to, all of your Windows problems.
 
 This script exports user accessible portions HKLM:\System, HKLM:\Software, and HKCU:\Software to a number of different .reg files stored in a directory structure copying the registry's nested key structure.  It is not fully recursive though and does not make individual .reg files for every single subkey.
 
-I have set breakpoints based on my own projected needs but the list of keys is easily modified to suit yours.  A quick way to speed things up is to remove Classes and CLSID keys from the list to export them as large single files.
+I have set default breakpoints based on my own projected needs but the list of keys is easily modified to suit yours.  Switching from W10 to W11 absolutely destroyed the performance of this script so I changed the defaults to export the giant "classes" subkeys as single large files and added a rate limiter.
 
 ## How to use it
 
@@ -42,4 +42,8 @@ Number of previous monthly backups to keep.  Default is 36.
 Pause at the end of the script before exiting.  Default is true.
 
 #### $ShowProgress
-Show progress bars.  It already updates infrequently so this only slows down things a bit instead of completely killing the performance.
+Show progress bars.  It updates somewhat infrequently as to only slows down things a bit instead of completely killing the performance.
+
+#### $Parallelization
+
+Limit to the number of concurrently running reg.exe instances.  You can increase this slowly until performance starts to decrease.
