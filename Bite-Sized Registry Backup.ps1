@@ -32,6 +32,8 @@ $MonthlyLimit = 36
 $Pause = $true
 #Show progress bars.  Slows script a bit
 $ShowProgress = $true
+#Parallelization limit
+$Parallelization = 100
 ####################################################################################################
 $Host.UI.RawUI.WindowTitle = "Bite-Sized Registry Backup"
 $ErrorActionPreference = 'Stop'
@@ -42,10 +44,10 @@ $ErrorActionPreference = 'Stop'
 [System.Collections.ArrayList]$ParentKeys = @(
 "HKCU:\SOFTWARE"
 "HKCU:\SOFTWARE\Classes"
-"HKCU:\SOFTWARE\Classes\CLSID"
+#"HKCU:\SOFTWARE\Classes\CLSID"
 "HKCU:\SOFTWARE\Classes\Local Settings"
 "HKCU:\SOFTWARE\Classes\WOW6432Node"
-"HKCU:\SOFTWARE\Classes\WOW6432Node\CLSID"
+#S"HKCU:\SOFTWARE\Classes\WOW6432Node\CLSID"
 "HKCU:\SOFTWARE\Clients"
 "HKCU:\SOFTWARE\GNU"
 "HKCU:\SOFTWARE\Microsoft"
@@ -57,17 +59,17 @@ $ErrorActionPreference = 'Stop'
 "HKCU:\SOFTWARE\WOW6432Node"
 "HKLM:\SOFTWARE"
 "HKLM:\SOFTWARE\Classes"
-"HKLM:\SOFTWARE\Classes\AppID"
-"HKLM:\SOFTWARE\Classes\CLSID"
+#"HKLM:\SOFTWARE\Classes\AppID"
+#"HKLM:\SOFTWARE\Classes\CLSID"
 "HKLM:\SOFTWARE\Classes\Installer"
 "HKLM:\SOFTWARE\Classes\Installer\Products"
-"HKLM:\SOFTWARE\Classes\Interface"
+#"HKLM:\SOFTWARE\Classes\Interface"
 "HKLM:\SOFTWARE\Classes\Record"
 "HKLM:\SOFTWARE\Classes\Record\SystemFileAssociations"
 "HKLM:\SOFTWARE\Classes\Record\TypeLib"
 "HKLM:\SOFTWARE\Classes\WOW6432Node"
-"HKLM:\SOFTWARE\Classes\WOW6432Node\CLSID"
-"HKLM:\SOFTWARE\Classes\WOW6432Node\Interface"
+#"HKLM:\SOFTWARE\Classes\WOW6432Node\CLSID"
+#"HKLM:\SOFTWARE\Classes\WOW6432Node\Interface"
 "HKLM:\SOFTWARE\Clients"
 "HKLM:\SOFTWARE\GNU"
 "HKLM:\SOFTWARE\Microsoft"
@@ -79,8 +81,8 @@ $ErrorActionPreference = 'Stop'
 "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
 "HKLM:\SOFTWARE\WOW6432Node"
 "HKLM:\SOFTWARE\WOW6432Node\Classes"
-"HKLM:\SOFTWARE\WOW6432Node\Classes\CLSID"
-"HKLM:\SOFTWARE\WOW6432Node\Classes\Interface"
+#"HKLM:\SOFTWARE\WOW6432Node\Classes\CLSID"
+#"HKLM:\SOFTWARE\WOW6432Node\Classes\Interface"
 "HKLM:\SOFTWARE\WOW6432Node\Clients"
 "HKLM:\SOFTWARE\WOW6432Node\Microsoft"
 "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows"
@@ -141,6 +143,9 @@ foreach ($ParentKey in $ParentKeys) {
             #Build argument string
             $a = "export " + "`"" + $RegPath + "`"" + " " + "`"" + $TempDir + $Subfolder + $FileName + ".reg`""
             #This will spawn many instances of reg.exe which will export different keys in parallel
+            while ((Get-Process -Name reg -ErrorAction SilentlyContinue).count -ge $Parallelization) {
+                Start-Sleep -Milliseconds 500
+            }
             Start-Process reg -ArgumentList $a -WindowStyle Hidden
         }
         $j++
@@ -152,6 +157,7 @@ foreach ($ParentKey in $ParentKeys) {
 while ((Get-Process).ProcessName -contains "reg") {
     Start-Sleep -s 5
 }
+
 
 #Compress with 7-Zip
 $Date = Get-Date -Format "yyyy/MM/dd"
